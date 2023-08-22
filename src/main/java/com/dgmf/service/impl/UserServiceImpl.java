@@ -6,13 +6,14 @@ import com.dgmf.entity.User;
 import com.dgmf.repository.UserRepository;
 import com.dgmf.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final List<ResponseUserDTO> responseUserDTOS;
 
     @Override
     public ResponseUserDTO addUser(RequestUserDTO requestUserDTO) {
@@ -28,12 +29,29 @@ public class UserServiceImpl implements UserService {
                 () -> new RuntimeException("Error occurred while adding User")
         );
 
-        ResponseUserDTO responseUserDTO = ResponseUserDTO.builder()
+        ResponseUserDTO returnedResponseUserDTO = ResponseUserDTO.builder()
                 .id(savedUser.getId())
                 .username(savedUser.getUsername())
                 .email(savedUser.getEmail())
                 .build();
 
-        return responseUserDTO;
+        return returnedResponseUserDTO;
+    }
+
+    @Override
+    public List<ResponseUserDTO> getAllUsers() {
+        List<User> users = userRepository.findAll();
+
+        for(User user: users) {
+            ResponseUserDTO responseUserDTO = ResponseUserDTO.builder()
+                    .id(user.getId())
+                    .username(user.getUsername())
+                    .email(user.getEmail())
+                    .build();
+
+            responseUserDTOS.add(responseUserDTO);
+        }
+
+        return responseUserDTOS;
     }
 }
